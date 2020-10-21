@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<!--
+An html page that allows the user to play a simple game of tic-tac-toe against
+the machine using mouse events. When the page is loaded, it randomly decides 
+whether the user or the machine will go first.
+-->
+<html>
+    <head>
+        <title>Tic-Tac-Toe</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body,html{min-height:100%;}
+            
+            h1{
+               text-align:center; font-size:45px; 
+               color:blue; padding:20px;
+               text-decoration:underline;
+            }
+            
+            span{
+               padding:10px;
+               border:2px solid black;
+               border-radius:10px;
+               background-color:white;
+               font-family:Impact;
+            }
+            
+            div span{
+                text-decoration:underline;
+                font-size:40px;
+                border:0px;
+            }
+            
+           .rules{
+               text-align:center; font-size:40px; 
+               padding:10px;
+               border:2px solid black;
+               border-radius:10px;
+               background-color:white;
+           }
+           
+           .canvas{text-align:center;}
+           
+           table{
+               margin:5px auto;
+               background-color:gainsboro;
+               border-collapse:collapse;
+           }
+           
+           td{
+               width:200px; height:200px;
+               padding:0;
+               border:4px solid black;
+           }
+           
+           table div{
+               display:block;
+               border:none;
+               width:100%;
+               height:100%;
+               background:transparent;
+               color:transparent;
+               cursor:pointer;
+           }
+           
+           table div:hover{background:gray;}
+           
+           .reset{font-size:40px; border-radius:5px;}
+           
+           .reset:hover{
+               cursor:pointer;
+               background:red;
+               color:white;
+               filter: drop-shadow(10px 10px 10px red);
+           }
+           
+           .reset:active{
+               box-shadow:0 5px white;
+               transform:translate(4px);
+           }
+
+        </style>
+        
+        <script>
+            var board=[[0,0,0],[0,0,0],[0,0,0]];
+            var previous;
+            var count=0;
+            window.addEventListener("load", start);
+            
+            function start()
+            {
+                if(Math.floor(Math.random()*2)===0)
+                    machine();
+                var tbody=document.getElementById("tablebody");
+                tbody.addEventListener("click", processEvent);
+                var divbody=document.getElementById("container");
+                divbody.addEventListener("click", reset);
+            }
+            
+            function processEvent(e)
+            {
+                if(e.target.tagName.toLowerCase()==="div")
+                { 
+                    e.target.setAttribute("style", "color:blue; font-size:10em;");
+                    e.target.innerHTML="X";
+                    board[e.target.getAttribute("data-row")][e.target.getAttribute("data-column")]=1;
+                    previous=e.target.innerHTML;
+                    count++;
+                    if(!gameOver())
+                        machine();
+                    if(gameOver())
+                    {
+                        if(previous==="O")
+                        {
+                            if(confirm("Game Over! The machine wins. Would you"
+                                       +" like to play again?"));
+                            {
+                                previous="clear";
+                                reset();  
+                            }
+                        }
+                        else
+                        {
+                            if(confirm("Congratulations, you won! Would you"
+                                        +" like to play again?"));
+                            {
+                                previous="clear";
+                                reset();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function gameOver()
+            {
+                var sumX;
+                var sumO;
+                
+                //Checking for a horizontal Victory
+                for(var i=0; i<3; i++)
+                {
+                    sumX=0;
+                    sumO=0;
+                    for(var j=0; j<3; j++)
+                    {
+                        if(board[i][j]===1)
+                            sumX++;
+                        if(board[i][j]===-1)
+                            sumO++;
+                    }
+                    if(sumX===3 || sumO===3)
+                        return true;
+                }
+                
+                //Checking for a vertical victory
+                for(var i=0; i<3; i++)
+                {
+                    sumX=0;
+                    sumO=0;
+                    for(var j=0; j<3; j++)
+                    {
+                        if(board[j][i]===1)
+                            sumX++;
+                        if(board[j][i]===-1)
+                            sumO++;
+                    }
+                    if(sumX===3 || sumO===3)
+                        return true;
+                }
+                
+                //Checking for a left to right diagonal victory
+                sumX=0;
+                sumO=0;
+                for(var i=0; i<3; i++)
+                {
+                    if(board[i][i]===1)
+                        sumX++;
+                    if(board[i][i]===-1)
+                        sumO++;
+                }
+                if(sumX===3 || sumO===3)
+                        return true;
+                    
+                //Checking for a right to left diagonal victory
+                sumX=0;
+                sumO=0;
+                for(var i=0; i<3; i++)
+                {
+                    if(board[i][2-i]===1)
+                        sumX++;
+                    if(board[i][2-i]===-1)
+                        sumO++;
+                }
+                if(sumX===3 || sumO===3)
+                        return true;
+                    
+                return false;
+            }
+            
+            function reset(e)
+            {
+                if(e.target.getAttribute("id")==="reset" || previous==="clear")
+                {
+                    var cellId;
+                    for(var i=0; i<9; i++)
+                    {
+                        cellId="element"+i;
+                        document.getElementById(cellId).innerHTML="";
+                    }
+                    for(var i=0; i<3; i++)
+                    {
+                        for(var j=0; j<3; j++)
+                        {
+                            board[i][j]=0;
+                        }
+                    }
+                    count=0;
+                    if(Math.floor((Math.random()*2))===0)
+                        machine();
+                }
+            }
+            
+            function machine()
+            {
+                if(!gameOver())
+                {
+                    if(count===9)
+                    {
+                        if(confirm("It's a draw! Would you like to play again?"));
+                        {
+                            previous="clear";
+                            reset();
+                        }
+                    }
+                    var cellId="element"+Math.floor((Math.random()*9));
+                    var activate=document.getElementById(cellId);
+                    if(activate.innerHTML==="X" || activate.innerHTML==="O")
+                        machine();
+                    else
+                    {
+                        activate=document.getElementById(cellId);
+                        activate.setAttribute("style", "color:red; font-size:10em;");
+                        activate.innerHTML="O";
+                        board[activate.getAttribute("data-row")][activate.getAttribute("data-column")]=-1;
+                        previous="O";
+                        count++;
+                        if(count===9)
+                        {
+                            if(confirm("It's a draw! Would you like to play again?"));
+                            {
+                                previous="clear";
+                                reset();
+                            }
+                        }
+                    }
+                }
+            }
+            
+            function coordinates(e)
+            {
+                var m="You clicked at ("+e.clientX+", "+e.clientY+")  Count:"+count;
+                document.getElementById("message").innerHTML=m;
+            }
+ 
+        </script>
+    </head>
+    <body style="background-image:url(Images/Background.jpg); background-size: cover; background-repeat: no-repeat;">
+        <h1><span>Tic-Tac-Toe</span></h1>
+        <div class="rules"><span>Rules:</span><BR/>Take turns against the machine by placing an 'X'
+            on the grid. This game randomly determines who goes first. If an 'O'
+            is already on the grid, that means the machine has already made the
+            first move. If you have three matching symbols either vertically,
+            horizontally, or diagonally before the machine does, you win. You
+            may click the 'Reset' button at any time to start a brand new game.
+        </div>
+        <BR/><BR/>
+        <div id="container" class="canvas">
+            <table id="board">
+                <tbody id="tablebody">
+		<tr>
+                    <td>
+			<div id="element0" data-row="0" data-column="0">Cell 1</div>
+                    </td>
+                    <td>
+			<div id="element1" data-row="0" data-column="1">Cell 2</div>
+                    </td>
+                    <td>
+			<div id="element2" data-row="0" data-column="2">Cell 3</div>
+                    </td>
+		</tr>
+		<tr>
+                    <td>
+			<div id="element3" data-row="1" data-column="0">Cell 4</div>
+                    </td>
+                    <td>
+			<div id="element4" data-row="1" data-column="1">Cell 5</div>
+                    </td>
+                    <td>
+			<div id="element5" data-row="1" data-column="2">Cell 6</div>
+                    </td>
+		</tr>
+		<tr>
+                    <td>
+			<div id="element6" data-row="2" data-column="0">Cell 7</div>
+                    </td>
+                    <td>
+			<div id="element7" data-row="2" data-column="1">Cell 8</div>
+                    </td>
+                    <td>
+			<div id="element8" data-row="2" data-column="2">Cell 9</div>
+                    </td>
+		</tr>
+                </tbody>
+            </table>
+            <BR/>
+            <button id ="reset" class="reset">Reset</button>
+            <P id="message" style="color:white;"></P>
+        </div>
+    </body>
+</html>
+
+
